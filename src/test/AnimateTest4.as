@@ -1,6 +1,6 @@
-package test
+package test 
 {
-	import animate.ImgAnimate2;
+	import animate.ImgAnimate4;
 	import flash.display.Sprite;
 	import net.hires.debug.Stats;
 	
@@ -8,18 +8,20 @@ package test
 	 * ...
 	 * @author jingping.shenjp
 	 */
-	public class AnimateTest2 extends Sprite
+	public class AnimateTest4 extends Sprite 
 	{
+		
 		[Embed(source="../../assets/wedding.jpg")]
 		private var YoyoGif:Class;
 		
-		public function AnimateTest2()
+		public function AnimateTest4()
 		{
-			var anim:ImgAnimate2 = new ImgAnimate2();
+			var anim:ImgAnimate4 = new ImgAnimate4();
 			anim.drawSource(new YoyoGif());
 			anim.start();
 			addChild(anim);
 			addChild(new Stats());
 		}
 	}
+
 }

@@ -7,27 +7,26 @@ package animate
 	import flash.events.Event;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import flash.utils.ByteArray;
 	import interfaces.IDispse;
 	import util.GlobalUtil;
 	
 	/**
-	 * 使用copyPixels绘制图像
-	 * 该方法效率高，但是透明效果不太好
+	 * 使用getVector\setVector绘制图像
+	 * 该方法效率高，没有透明效果(与getPixels\setPixels效率差不多)
 	 * @author jingping.shenjp
 	 */
-	public class ImgAnimate2 extends Sprite implements IDispse
+	public class ImgAnimate4 extends Sprite implements IDispse
 	{
 		static public const ANIMATE_END:String = "animateEnd";
-		private const transparent:uint = 0x00000000;
-		private const opaque:uint = 0xFFFFFFFF;
 		private const SLICE_W:int = 4;
 		private const SLICE_H:int = 4;
-		private var _cacheBmp:Vector.<Vector.<PositionBitMapData>>
+		private var _cacheBmp:Vector.<Vector.<PositionVector>>
 		private var sourceBmd:BitmapData;
 		private var _showBmd:BitmapData;
 		private var _showBmp:Bitmap;
 		
-		public function ImgAnimate2()
+		public function ImgAnimate4()
 		{
 		}
 		
@@ -56,11 +55,11 @@ package animate
 			}
 			if (_cacheBmp)
 			{
-				for each (var vect:Vector.<PositionBitMapData>in _cacheBmp)
+				for each (var vect:Vector.<PositionVector> in _cacheBmp)
 				{
-					for each (var bmd:PositionBitMapData in vect)
+					for each (var btye:PositionVector in vect)
 					{
-						bmd.dispose();
+						btye.vector.length = 0;
 					}
 				}
 				_cacheBmp.length = 0;
@@ -70,30 +69,32 @@ package animate
 		
 		private function initBitmapData():void
 		{
-			_cacheBmp = new Vector.<Vector.<PositionBitMapData>>();
+			_cacheBmp = new Vector.<Vector.<PositionVector>>();
 			var bmp_w:int = sourceBmd.width;
 			var bmp_h:int = sourceBmd.height;
 			var temp_w:int = 0;
 			var temp_h:int = 0;
 			var count_w:int = 0;
 			var count_h:int = 0;
-			var slice_bmd:PositionBitMapData;
+			var slice_byte:PositionVector;
+			var vect:Vector.<uint>;
 			var pos:Point;
 			while (temp_w < bmp_w)
 			{
-				_cacheBmp[count_w] = new Vector.<PositionBitMapData>();
+				_cacheBmp[count_w] = new Vector.<PositionVector>();
 				count_h = 0;
 				temp_h = 0;
 				while (temp_h < bmp_h)
 				{
-					slice_bmd = new PositionBitMapData(SLICE_W, SLICE_H);
+					slice_byte = new PositionVector();
 					pos = new Point(SLICE_W * count_w, SLICE_H * count_h);
-					slice_bmd.copyPixels(sourceBmd, new Rectangle(pos.x, pos.y, SLICE_W, SLICE_H), new Point(), null, new Point(), false);
-					slice_bmd.position = pos;
-					slice_bmd.mass = 1 + Math.random() * 5;
-					slice_bmd.x = pos.x;
-					slice_bmd.y = pos.y;
-					_cacheBmp[count_w][count_h] = slice_bmd;
+					vect = sourceBmd.getVector(new Rectangle(pos.x, pos.y, SLICE_W, SLICE_H));
+					slice_byte.vector = vect;
+					slice_byte.dataPosition = pos;
+					slice_byte.mass = 1 + Math.random() * 5;
+					slice_byte.x = pos.x;
+					slice_byte.y = pos.y;
+					_cacheBmp[count_w][count_h] = slice_byte;
 					temp_h += SLICE_H;
 					count_h++;
 				}
@@ -106,9 +107,9 @@ package animate
 		{
 			var inViewRange:Rectangle = new Rectangle(0, 0, GlobalUtil.W, GlobalUtil.H);
 			var tempPos:Point = new Point();
-			for each (var vect:Vector.<PositionBitMapData>in _cacheBmp)
+			for each (var vect:Vector.<PositionVector> in _cacheBmp)
 			{
-				for each (var bmp:PositionBitMapData in vect)
+				for each (var bmp:PositionVector in vect)
 				{
 					tempPos = randomPos(GlobalUtil.W, GlobalUtil.H);
 					while (inViewRange.contains(tempPos.x, tempPos.y))
@@ -131,43 +132,30 @@ package animate
 		{
 			var pos:Point;
 			var isAllGetAim:Boolean = true;
-			var alphaFillColor:uint = 0x00000000;
-			var alphaBitmapData:BitmapData = new BitmapData(SLICE_W, SLICE_W);
-			var alpha:Number = 0;
-			_showBmd.fillRect(new Rectangle(0, 0, GlobalUtil.W, GlobalUtil.H), transparent);
+			_showBmd.fillRect(new Rectangle(0, 0, GlobalUtil.W, GlobalUtil.H), 0x00000000);
+			var vector:Vector.<uint>;
 			_showBmd.lock();
-			for each (var vect:Vector.<PositionBitMapData>in _cacheBmp)
+			for each (var vect:Vector.<PositionVector>in _cacheBmp)
 			{
-				for each (var bmp:PositionBitMapData in vect)
+				for each (var byte:PositionVector in vect)
 				{
-					if (!bmp.isGetAim)
+					if (!byte.isGetAim)
 					{
-						pos = bmp.position;
-						bmp.vx = (pos.x - bmp.x) / (bmp.mass * 3);
-						bmp.vy = (pos.y - bmp.y) / (bmp.mass * 3);
-						bmp.x += bmp.vx;
-						bmp.y += bmp.vy;
-						alpha = 50 / Math.sqrt(((pos.x - bmp.x) * (pos.x - bmp.x) + (pos.y - bmp.y) * (pos.y - bmp.y)));
-						if ((Math.abs((pos.x - bmp.x)) < 1) && (Math.abs((pos.y - bmp.y)) < 1))
+						pos = byte.dataPosition;
+						byte.vx = (pos.x - byte.x) / (byte.mass * 3);
+						byte.vy = (pos.y - byte.y) / (byte.mass * 3);
+						byte.x += byte.vx;
+						byte.y += byte.vy;
+						if ((Math.abs((pos.x - byte.x)) < 1) && (Math.abs((pos.y - byte.y)) < 1))
 						{
-							bmp.x = pos.x;
-							bmp.y = pos.y;
-							bmp.isGetAim = true;
-							alpha = 1;
+							byte.x = pos.x;
+							byte.y = pos.y;
+							byte.isGetAim = true;
 						}
-						if (alpha > 1)
-						{
-							alpha = 1;
-						}
-						alphaFillColor = ((0xFF * alpha) << 24) + 0xFFFFFF;
-						alphaBitmapData.fillRect(new Rectangle(0, 0, SLICE_W, SLICE_H), alphaFillColor);
 						isAllGetAim = false;
 					}
-					if (isAllGetAim)
-					{
-						alphaBitmapData.fillRect(new Rectangle(0, 0, SLICE_W, SLICE_H), opaque);
-					}
-					_showBmd.copyPixels(bmp, new Rectangle(0, 0, SLICE_W, SLICE_H), new Point(bmp.x, bmp.y), alphaBitmapData, new Point());
+					vector = byte.vector;
+					_showBmd.setVector(new Rectangle(byte.x, byte.y, SLICE_W, SLICE_H), vector);
 				}
 			}
 			_showBmd.unlock();

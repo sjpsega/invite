@@ -16,21 +16,21 @@
     </define>
     <define append="true">
       <name>CONFIG::timeStamp</name>
-      <value>'2012-3-28'</value>
+      <value>'2012-4-2'</value>
     </define>
     <verbose-stacktraces>true</verbose-stacktraces>
     <source-path append="true">
-      <path-element>C:\Documents and Settings\sjp\桌面\invite\git\invite\src</path-element>
+      <path-element>E:\gitsource\invite\git\invite\src</path-element>
       <path-element>d:\Program Files\FlashDevelop\Library\AS3\classes</path-element>
     </source-path>
     <library-path append="true">
-      <path-element>C:\Documents and Settings\sjp\桌面\invite\git\invite\lib\invite.swc</path-element>
+      <path-element>E:\gitsource\invite\git\invite\lib\invite.swc</path-element>
     </library-path>
   </compiler>
   <file-specs>
-    <path-element>C:\Documents and Settings\sjp\桌面\invite\git\invite\src\test\AnimateTest.as</path-element>
+    <path-element>E:\gitsource\invite\git\invite\src\test\AnimateTest4.as</path-element>
   </file-specs>
-  <default-background-color>#C0C0C0</default-background-color>
+  <default-background-color>#FFFFFF</default-background-color>
   <default-frame-rate>30</default-frame-rate>
   <default-size>
     <width>800</width>

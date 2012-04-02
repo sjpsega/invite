@@ -10,14 +10,15 @@ package animate
 	import util.GlobalUtil;
 	
 	/**
-	 * 使用BitMap移动，绘制图像
+	 * 使用BitMap移动，绘制图像.
+	 * 效率太低。
 	 * @author jingping.shenjp
 	 */
 	public class ImgAnimate extends Sprite implements IDispse
 	{
 		static public const ANIMATE_END:String = "animateEnd";
-		private const SLICE_W:int = 10;
-		private const SLICE_H:int = 10;
+		private const SLICE_W:int = 4;
+		private const SLICE_H:int = 4;
 		private var _cacheBmp:Vector.<Vector.<PositionBitMap>>
 		private var sourceBmd:BitmapData;
 		
